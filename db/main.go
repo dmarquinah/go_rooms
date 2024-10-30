@@ -14,7 +14,7 @@ const DB_PASSWORD_KEY = "DB_PASSWORD"
 const DB_USER_KEY = "DB_USER"
 const DB_NAME_KEY = "DB_NAME"
 
-func HandleDBConnection() {
+func HandleDBConnection() *sql.DB {
 	// Open connection to Database
 	database, err := sql.Open("mysql", getDSN())
 
@@ -30,6 +30,7 @@ func HandleDBConnection() {
 		panic(err.Error())
 	}
 	log.Println("Database connected successfully!")
+	return database
 }
 
 func getDSN() string {
