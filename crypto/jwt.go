@@ -13,7 +13,7 @@ func getSecretKey() []byte {
 	return []byte(os.Getenv("JWT_SECRET_KEY"))
 }
 
-func validateToken(t *jwt.Token) (interface{}, error) {
+func tokenValidator(t *jwt.Token) (interface{}, error) {
 	secretKey := getSecretKey()
 
 	if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -38,8 +38,8 @@ func GenerateJWT(id int) *string {
 	return &tokenString
 }
 
-func ValidateJWT(tokenString string, id int, key string) bool {
-	token, err := jwt.Parse(tokenString, validateToken)
+func ValidateJWT(tokenString string, key string) bool {
+	token, err := jwt.Parse(tokenString, tokenValidator)
 
 	if err != nil {
 		return false
@@ -56,16 +56,18 @@ func ValidateJWT(tokenString string, id int, key string) bool {
 		return false
 	}
 
+	id := GetIdFromJWT(tokenString)
+
 	switch key {
 	case "id":
-		return id == int(claims["id"].(float64))
+		return int(claims["id"].(float64)) == *id
 	default:
 		return false
 	}
 }
 
 func GetIdFromJWT(tokenString string) *int {
-	token, err := jwt.Parse(tokenString, validateToken)
+	token, err := jwt.Parse(tokenString, tokenValidator)
 
 	if err != nil {
 		return nil

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/dmarquinah/go_rooms/db"
+	"github.com/dmarquinah/go_rooms/routes"
 	"github.com/joho/godotenv"
 )
 
@@ -21,18 +23,8 @@ func main() {
 	// DB connection logic lays here
 	db.HandleDBConnection()
 
-	// Define basic route handlers to endpoints
-	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		// types.Login(w, r, database)
-	})
-	http.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
-		// types.HandleUser(w, r, database)
-	})
-	http.HandleFunc("/task", func(w http.ResponseWriter, r *http.Request) {
-		// types.HandleTask(w, r, database)
-	})
+	mux := routes.BuildMux()
 
-	println("Server listening on port " + SERVER_PORT)
-	http.ListenAndServe(SERVER_PORT, nil)
-
+	fmt.Println("Server listening on port " + SERVER_PORT)
+	log.Fatal(http.ListenAndServe(SERVER_PORT, mux))
 }
