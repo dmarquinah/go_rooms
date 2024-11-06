@@ -8,23 +8,22 @@ USE `MEDIA_ROOMS` ;
 -- Table `MEDIA_ROOMS`.`User`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`User` (
-  `userId` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
   `email` VARCHAR(255) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_handle` VARCHAR(255) NULL,
-  PRIMARY KEY (`userId`)
-);
+  PRIMARY KEY (`user_id`));
 
 
 -- -----------------------------------------------------
 -- Table `MEDIA_ROOMS`.`Host`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Host` (
-  `hostId` INT NOT NULL AUTO_INCREMENT,
+  `host_id` INT NOT NULL AUTO_INCREMENT,
   `host_username` VARCHAR(255) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`hostId`)
+  PRIMARY KEY (`host_id`)
 );
 
 
@@ -32,35 +31,25 @@ CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Host` (
 -- Table `MEDIA_ROOMS`.`Room`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Room` (
-  `roomId` INT NOT NULL,
+  `room_id` INT NOT NULL,
   `user_owner` INT NOT NULL,
-  `hostId` INT NOT NULL,
+  `host_id` INT NOT NULL,
   `room_code` VARCHAR(255) NOT NULL,
   `start_date` DATETIME NOT NULL,
   `end_date` DATETIME NOT NULL,
-  PRIMARY KEY (`roomId`),
+  PRIMARY KEY (`room_id`),
   INDEX `fk_Room_User_idx` (`user_owner` ASC) VISIBLE,
-  INDEX `fk_Room_Host_idx` (`hostId` ASC) VISIBLE,
+  INDEX `fk_Room_Host_idx` (`host_id` ASC) VISIBLE,
   CONSTRAINT `fk_Room_User`
     FOREIGN KEY (`user_owner`)
-    REFERENCES `MEDIA_ROOMS`.`User` (`userId`)
+    REFERENCES `MEDIA_ROOMS`.`User` (`user_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Room_Host`
-    FOREIGN KEY (`hostId`)
-    REFERENCES `MEDIA_ROOMS`.`Host` (`hostId`)
+    FOREIGN KEY (`host_id`)
+    REFERENCES `MEDIA_ROOMS`.`Host` (`host_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
-);
-
-
--- -----------------------------------------------------
--- Table `MEDIA_ROOMS`.`MediaGenre`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`MediaGenre` (
-  `genreId` INT NOT NULL,
-  `genre_name` VARCHAR(200) NOT NULL,
-  PRIMARY KEY (`genreId`)
 );
 
 
@@ -68,18 +57,22 @@ CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`MediaGenre` (
 -- Table `MEDIA_ROOMS`.`Media`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Media` (
-  `mediaId` INT NOT NULL,
+  `media_id` INT NOT NULL,
   `url` VARCHAR(255) NOT NULL,
   `title` VARCHAR(200) NOT NULL,
   `artist` VARCHAR(200) NULL,
-  `genreId` INT NULL,
-  PRIMARY KEY (`mediaId`),
-  INDEX `fk_Media_MediaGenre_idx` (`genreId` ASC) VISIBLE,
-  CONSTRAINT `fk_Media_MediaGenre`
-    FOREIGN KEY (`genreId`)
-    REFERENCES `MEDIA_ROOMS`.`MediaGenre` (`genreId`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
+  `year` INT NULL,
+  PRIMARY KEY (`media_id`)
+);
+
+
+-- -----------------------------------------------------
+-- Table `MEDIA_ROOMS`.`Tag`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Tag` (
+  `tag_id` INT NOT NULL,
+  `tag` VARCHAR(200) NOT NULL,
+  PRIMARY KEY (`tag_id`)
 );
 
 
@@ -87,13 +80,19 @@ CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Media` (
 -- Table `MEDIA_ROOMS`.`MediaTag`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`MediaTag` (
-  `mediaId` INT NOT NULL,
-  `tag` VARCHAR(100) NOT NULL,
-  INDEX `fk_MediaTag_Media_idx` (`mediaId` ASC) VISIBLE,
-  PRIMARY KEY (`mediaId`),
+  `media_id` INT NOT NULL,
+  `tag_id` INT NOT NULL,
+  INDEX `fk_MediaTag_Media_idx` (`media_id` ASC) VISIBLE,
+  PRIMARY KEY (`media_id`, `tag_id`),
+  INDEX `fk_MediaTag_Tag_idx` (`tag_id` ASC) VISIBLE,
   CONSTRAINT `fk_MediaTag_Media`
-    FOREIGN KEY (`mediaId`)
-    REFERENCES `MEDIA_ROOMS`.`Media` (`mediaId`)
+    FOREIGN KEY (`media_id`)
+    REFERENCES `MEDIA_ROOMS`.`Media` (`media_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_MediaTag_Tag`
+    FOREIGN KEY (`tag_id`)
+    REFERENCES `MEDIA_ROOMS`.`Tag` (`tag_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
 );
@@ -103,22 +102,22 @@ CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`MediaTag` (
 -- Table `MEDIA_ROOMS`.`RoomQueue`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`RoomQueue` (
-  `roomId` INT NOT NULL,
-  `mediaId` INT NOT NULL,
+  `room_id` INT NOT NULL,
+  `media_id` INT NOT NULL,
   `removed` TINYINT NOT NULL DEFAULT 0,
-  `insert_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `insert_date` DATETIME NOT NULL,
   `is_playing` TINYINT NOT NULL DEFAULT 0,
-  INDEX `fk_RoomQueue_Media_idx` (`mediaId` ASC) VISIBLE,
-  INDEX `fk_RoomQueue_Room_idx` (`roomId` ASC) VISIBLE,
-  PRIMARY KEY (`roomId`, `mediaId`),
+  INDEX `fk_RoomQueue_Media_idx` (`media_id` ASC) VISIBLE,
+  INDEX `fk_RoomQueue_Room_idx` (`room_id` ASC) VISIBLE,
+  PRIMARY KEY (`room_id`, `media_id`),
   CONSTRAINT `fk_RoomQueue_Media`
-    FOREIGN KEY (`mediaId`)
-    REFERENCES `MEDIA_ROOMS`.`Media` (`mediaId`)
+    FOREIGN KEY (`media_id`)
+    REFERENCES `MEDIA_ROOMS`.`Media` (`media_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_RoomQueue_Room`
-    FOREIGN KEY (`roomId`)
-    REFERENCES `MEDIA_ROOMS`.`Room` (`roomId`)
+    FOREIGN KEY (`room_id`)
+    REFERENCES `MEDIA_ROOMS`.`Room` (`room_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
 );
@@ -128,14 +127,14 @@ CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`RoomQueue` (
 -- Table `MEDIA_ROOMS`.`Participant`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Participant` (
-  `participantId` INT NOT NULL,
-  `userId` INT NOT NULL,
+  `participant_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
   `participant_handle` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`participantId`),
-  INDEX `fk_Participant_User_idx` (`userId` ASC) VISIBLE,
+  PRIMARY KEY (`participant_id`),
+  INDEX `fk_Participant_User_idx` (`user_id` ASC) VISIBLE,
   CONSTRAINT `fk_Participant_User`
-    FOREIGN KEY (`userId`)
-    REFERENCES `MEDIA_ROOMS`.`User` (`userId`)
+    FOREIGN KEY (`user_id`)
+    REFERENCES `MEDIA_ROOMS`.`User` (`user_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
 );
@@ -145,20 +144,69 @@ CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Participant` (
 -- Table `MEDIA_ROOMS`.`RoomParticipant`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`RoomParticipant` (
-  `participantId` INT NOT NULL,
-  `roomId` INT NOT NULL,
+  `participant_id` INT NOT NULL,
+  `room_id` INT NOT NULL,
   `join_date` DATETIME NOT NULL,
-  INDEX `fk_RoomParticipant_Participant_idx` (`participantId` ASC) VISIBLE,
-  INDEX `fk_RoomParticipant_Room_idx` (`roomId` ASC) VISIBLE,
-  PRIMARY KEY (`participantId`, `roomId`),
+  INDEX `fk_RoomParticipant_Participant_idx` (`participant_id` ASC) VISIBLE,
+  INDEX `fk_RoomParticipant_Room_idx` (`room_id` ASC) VISIBLE,
+  PRIMARY KEY (`participant_id`, `room_id`),
   CONSTRAINT `fk_RoomParticipant_Participant`
-    FOREIGN KEY (`participantId`)
-    REFERENCES `MEDIA_ROOMS`.`Participant` (`participantId`)
+    FOREIGN KEY (`participant_id`)
+    REFERENCES `MEDIA_ROOMS`.`Participant` (`participant_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_RoomParticipant_Room`
-    FOREIGN KEY (`roomId`)
-    REFERENCES `MEDIA_ROOMS`.`Room` (`roomId`)
+    FOREIGN KEY (`room_id`)
+    REFERENCES `MEDIA_ROOMS`.`Room` (`room_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+);
+
+
+-- -----------------------------------------------------
+-- Table `MEDIA_ROOMS`.`Genre`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Genre` (
+  `genre_id` INT NOT NULL,
+  `genre_name` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`genre_id`)
+);
+
+
+-- -----------------------------------------------------
+-- Table `MEDIA_ROOMS`.`MediaGenre`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`MediaGenre` (
+  `media_id` INT NOT NULL,
+  `genre_id` INT NOT NULL,
+  INDEX `fk_MediaGenre_Genre_idx` (`genre_id` ASC) VISIBLE,
+  INDEX `fk_MediaGenre_Media_idx` (`media_id` ASC) VISIBLE,
+  PRIMARY KEY (`genre_id`, `media_id`),
+  CONSTRAINT `fk_MediaGenre_Genre`
+    FOREIGN KEY (`genre_id`)
+    REFERENCES `MEDIA_ROOMS`.`Genre` (`genre_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_MediaGenre_Media`
+    FOREIGN KEY (`media_id`)
+    REFERENCES `MEDIA_ROOMS`.`Media` (`media_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+);
+
+
+-- -----------------------------------------------------
+-- Table `MEDIA_ROOMS`.`MediaOrigin`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`MediaOrigin` (
+  `media_id` INT NOT NULL,
+  `country` VARCHAR(200) NULL,
+  `language` VARCHAR(200) NULL,
+  INDEX `fk_MediaOrigin_Media_idx` (`media_id` ASC) VISIBLE,
+  PRIMARY KEY (`media_id`),
+  CONSTRAINT `fk_MediaOrigin_Media`
+    FOREIGN KEY (`media_id`)
+    REFERENCES `MEDIA_ROOMS`.`Media` (`media_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
 );
