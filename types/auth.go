@@ -9,115 +9,84 @@ import (
 	"github.com/dmarquinah/go_rooms/crypto"
 )
 
-func LoginUser(w http.ResponseWriter, r *http.Request, database *sql.DB) bool {
+func LoginUser(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Error reading the body of request.", http.StatusBadRequest)
+		WriteErrorResponse(w, "Error reading the body of request.", http.StatusBadRequest)
 	}
 	defer r.Body.Close()
 
 	user, err := BodyToUser(body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		WriteErrorResponse(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	if user == nil {
-		http.Error(w, "Error wrapping the body to user.", http.StatusBadRequest)
-		return false
+		WriteErrorResponse(w, "Error wrapping the body to user.", http.StatusBadRequest)
+		return
 	}
 
 	// Get actual user data
 	userRecord, err := findUserByEmail(user.Email, database)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		WriteErrorResponse(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	if userRecord == nil {
-		http.Error(w, "User email not found.", http.StatusBadRequest)
-		return false
+		WriteErrorResponse(w, "User email not found.", http.StatusBadRequest)
+		return
 	}
 
 	// Compare the hashed password with the database
 	if !crypto.VerifyPassword(user.Password, userRecord.Password) {
-		http.Error(w, "Email/Password incorrect", http.StatusUnauthorized)
-		return false
+		WriteErrorResponse(w, "Email/Password incorrect", http.StatusUnauthorized)
 	}
 
 	tokenString := crypto.GenerateJWT(userRecord.UserId)
 
-	resData := ResponseData{
-		Message: *tokenString,
-	}
-
-	resJSON := GetResponseDataJson(resData)
-
-	if resJSON == nil {
-		http.Error(w, "Error parsing the response data to JSON. ", http.StatusInternalServerError)
-		return false
-	}
-
-	w.Write(*resJSON)
-	w.WriteHeader(http.StatusOK)
-
-	return true
+	WriteSuccessResponse(w, GetSuccessMessage(r), *tokenString)
 }
 
-func RegisterUser(w http.ResponseWriter, r *http.Request, database *sql.DB) bool {
+func RegisterUser(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Error reading the body of request.", http.StatusBadRequest)
+		WriteErrorResponse(w, "Error reading the body of request.", http.StatusBadRequest)
+		return
 	}
 	defer r.Body.Close()
 
 	user, err := BodyToUser(body)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		WriteErrorResponse(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	if user == nil {
-		http.Error(w, "Error wrapping the body to user.", http.StatusBadRequest)
-		return false
+		WriteErrorResponse(w, "Error wrapping the body to user.", http.StatusBadRequest)
+		return
 	}
 
 	// Get actual user data
 	userRecord, err := findUserByEmail(user.Email, database)
 
 	if err != nil && err != sql.ErrNoRows {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		WriteErrorResponse(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	if userRecord != nil {
-		http.Error(w, "User with provided email already exists.", http.StatusBadRequest)
-		return false
+		WriteErrorResponse(w, "User with provided email already exists.", http.StatusBadRequest)
 	}
 
-	inserted, err := createUser(user, database)
+	inserted, err := insertUser(user, database)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
+		WriteErrorResponse(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	resData := ResponseData{
-		Message: strconv.Itoa(inserted.UserId),
-	}
+	WriteSuccessResponse(w, GetSuccessMessage(r), strconv.Itoa(inserted.UserId))
 
-	resJSON := GetResponseDataJson(resData)
-
-	if resJSON == nil {
-		http.Error(w, "Error parsing the response data to JSON. ", http.StatusInternalServerError)
-		return false
-	}
-
-	res, err := w.Write(*resJSON)
-	w.WriteHeader(http.StatusOK)
-
-	if err != nil {
-		http.Error(w, "Error writing response. ", http.StatusInternalServerError)
-		return false
-	}
-
-	return res != 0
 }

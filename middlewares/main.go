@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dmarquinah/go_rooms/crypto"
+	"github.com/dmarquinah/go_rooms/types"
 	"github.com/dmarquinah/go_rooms/utils"
 )
 
@@ -15,7 +16,7 @@ func JWTmiddleware(next http.HandlerFunc) http.Handler {
 			valid := crypto.ValidateJWT(*token, "id")
 
 			if !valid {
-				http.Error(w, "Invalid Auth token", http.StatusUnauthorized)
+				types.WriteErrorResponse(w, "Invalid Auth token", http.StatusUnauthorized)
 				return
 			}
 

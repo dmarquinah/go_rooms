@@ -33,37 +33,20 @@ func BodyToUser(body []byte) (*User, error) {
 	return &user, nil
 }
 
-func GetUser(w http.ResponseWriter, r *http.Request, database *sql.DB) bool {
+func GetUser(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	if id, ok := r.Context().Value(utils.IdKey).(string); ok {
 		userRecord, err := getUserFromId(id, database)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return false
+			WriteErrorResponse(w, err.Error(), http.StatusInternalServerError)
+
 		}
 
 		if userRecord == nil {
-			http.Error(w, "Error retrieving user data.", http.StatusInternalServerError)
-			return false
+			WriteErrorResponse(w, "Error retrieving user data.", http.StatusInternalServerError)
 		}
 
-		resData := ResponseData{
-			Message: userRecord.Email,
-		}
+		WriteSuccessResponse(w, GetSuccessMessage(r), userRecord)
 
-		resJSON := GetResponseDataJson(resData)
-
-		if resJSON == nil {
-			http.Error(w, "Error parsing the response data to JSON. ", http.StatusInternalServerError)
-			return false
-		}
-
-		w.WriteHeader(http.StatusOK)
-		w.Write(*resJSON)
-
-		return true
-
-	} else {
-		return false
 	}
 }
 
@@ -100,7 +83,7 @@ func findUserByEmail(email string, database *sql.DB) (*User, error) {
 	return &user, nil
 }
 
-func createUser(user *User, database *sql.DB) (*User, error) {
+func insertUser(user *User, database *sql.DB) (*User, error) {
 	password, err := crypto.HashPassword(user.Password)
 
 	if err != nil {
