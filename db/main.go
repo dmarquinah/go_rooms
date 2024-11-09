@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -22,7 +23,12 @@ func HandleDBConnection() *sql.DB {
 		// Panic so it ends app execution
 		panic(err.Error())
 	}
-	defer database.Close()
+
+	database.SetConnMaxLifetime(time.Minute * 3)
+	database.SetMaxOpenConns(10)
+	database.SetMaxIdleConns(10)
+
+	//defer database.Close()
 
 	// Check connection status
 	err = database.Ping()

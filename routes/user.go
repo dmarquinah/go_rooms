@@ -1,16 +1,19 @@
 package routes
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/dmarquinah/go_rooms/middlewares"
+	"github.com/dmarquinah/go_rooms/types"
 )
 
-func createUserRoutes(mux *http.ServeMux) {
-	mux.Handle("GET /user", middlewares.JWTmiddleware(handleGetUser))
+func createUserRoutes(mux *http.ServeMux, database *sql.DB) {
+	mux.Handle("GET /user", middlewares.JWTmiddleware(handleGetUser(database)))
 }
 
-func handleGetUser(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Successfully obtained user"))
+func handleGetUser(database *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		types.GetUser(w, r, database)
+	}
 }

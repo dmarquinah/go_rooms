@@ -1,12 +1,25 @@
 package routes
 
-import "net/http"
+import (
+	"database/sql"
+	"net/http"
 
-func createAuthRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("POST /auth/login", handlePostLogin)
+	"github.com/dmarquinah/go_rooms/types"
+)
+
+func createAuthRoutes(mux *http.ServeMux, database *sql.DB) {
+	mux.HandleFunc("POST /auth/login", handlePostLogin(database))
+	mux.HandleFunc("POST /auth/register", handlePostRegister(database))
 }
 
-func handlePostLogin(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("This is a POST login"))
+func handlePostLogin(database *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		types.LoginUser(w, r, database)
+	}
+}
+
+func handlePostRegister(database *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		types.RegisterUser(w, r, database)
+	}
 }

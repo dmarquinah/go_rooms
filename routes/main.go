@@ -1,11 +1,14 @@
 package routes
 
-import "net/http"
+import (
+	"database/sql"
+	"net/http"
+)
 
-func BuildMux() *http.ServeMux {
+func BuildMux(database *sql.DB) *http.ServeMux {
 	mux := http.NewServeMux()
-	createAuthRoutes(mux)
-	createUserRoutes(mux)
+	createAuthRoutes(mux, database)
+	createUserRoutes(mux, database)
 
 	return mux
 }

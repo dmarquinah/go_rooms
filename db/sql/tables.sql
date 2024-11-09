@@ -8,7 +8,7 @@ USE `MEDIA_ROOMS` ;
 -- Table `MEDIA_ROOMS`.`User`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`User` (
-  `user_id` INT NOT NULL,
+  `user_id` INT NOT NULL AUTO_INCREMENT,
   `email` VARCHAR(255) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Host` (
 -- Table `MEDIA_ROOMS`.`Room`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Room` (
-  `room_id` INT NOT NULL,
+  `room_id` INT NOT NULL AUTO_INCREMENT,
   `user_owner` INT NOT NULL,
   `host_id` INT NOT NULL,
   `room_code` VARCHAR(255) NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Room` (
 -- Table `MEDIA_ROOMS`.`Media`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Media` (
-  `media_id` INT NOT NULL,
+  `media_id` INT NOT NULL AUTO_INCREMENT,
   `url` VARCHAR(255) NOT NULL,
   `title` VARCHAR(200) NOT NULL,
   `artist` VARCHAR(200) NULL,
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Media` (
 -- Table `MEDIA_ROOMS`.`Tag`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Tag` (
-  `tag_id` INT NOT NULL,
+  `tag_id` INT NOT NULL AUTO_INCREMENT,
   `tag` VARCHAR(200) NOT NULL,
   PRIMARY KEY (`tag_id`)
 );
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`RoomQueue` (
 -- Table `MEDIA_ROOMS`.`Participant`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Participant` (
-  `participant_id` INT NOT NULL,
+  `participant_id` INT NOT NULL AUTO_INCREMENT,
   `user_id` INT NOT NULL,
   `participant_handle` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`participant_id`),
@@ -167,7 +167,7 @@ CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`RoomParticipant` (
 -- Table `MEDIA_ROOMS`.`Genre`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MEDIA_ROOMS`.`Genre` (
-  `genre_id` INT NOT NULL,
+  `genre_id` INT NOT NULL AUTO_INCREMENT,
   `genre_name` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`genre_id`)
 );

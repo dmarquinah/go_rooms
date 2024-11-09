@@ -21,9 +21,9 @@ func main() {
 	}
 
 	// DB connection logic lays here
-	db.HandleDBConnection()
+	database := db.HandleDBConnection()
 
-	mux := routes.BuildMux()
+	mux := routes.BuildMux(database)
 
 	fmt.Println("Server listening on port " + SERVER_PORT)
 	log.Fatal(http.ListenAndServe(SERVER_PORT, mux))
