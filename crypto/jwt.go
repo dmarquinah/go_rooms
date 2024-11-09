@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -25,8 +26,10 @@ func tokenValidator(t *jwt.Token) (interface{}, error) {
 func GenerateJWT(id int) *string {
 	secretKey := getSecretKey()
 	token := jwt.New(jwt.SigningMethodHS256)
+	ttl := 24 * time.Hour
 
 	claims := token.Claims.(jwt.MapClaims)
+	claims["exp"] = time.Now().UTC().Add(ttl).Unix()
 	claims["id"] = id
 
 	tokenString, err := token.SignedString(secretKey)
