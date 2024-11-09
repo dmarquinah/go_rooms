@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/dmarquinah/go_rooms/db"
 	"github.com/dmarquinah/go_rooms/routes"
@@ -23,8 +24,13 @@ func main() {
 	// DB connection logic lays here
 	database := db.HandleDBConnection()
 
-	mux := routes.BuildMux(database)
+	router := routes.BuildRouter(database)
+
+	updatedRouter := routes.SetupGlobalMiddlewares(router)
 
 	fmt.Println("Server listening on port " + SERVER_PORT)
-	log.Fatal(http.ListenAndServe(SERVER_PORT, mux))
+	if err := http.ListenAndServe(SERVER_PORT, updatedRouter); err != nil {
+		log.Fatalf("error on init server")
+		os.Exit(1)
+	}
 }

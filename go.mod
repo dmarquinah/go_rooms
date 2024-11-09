@@ -9,3 +9,8 @@ require (
 )
 
 require golang.org/x/crypto v0.29.0
+
+require (
+	github.com/go-kit/log v0.2.1
+	github.com/go-logfmt/logfmt v0.5.1 // indirect
+)

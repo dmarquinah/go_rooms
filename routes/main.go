@@ -5,10 +5,10 @@ import (
 	"net/http"
 )
 
-func BuildMux(database *sql.DB) *http.ServeMux {
-	mux := http.NewServeMux()
-	createAuthRoutes(mux, database)
-	createUserRoutes(mux, database)
+func BuildRouter(database *sql.DB) *http.ServeMux {
+	router := http.NewServeMux()
+	createAuthRoutes(router, database)
+	createUserRoutes(router, database)
 
-	return mux
+	return router
 }
