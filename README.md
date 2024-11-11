@@ -65,6 +65,9 @@ Go Rooms is a backend application written in Golang. It aims to create WebSocket
 - [ ] Test broadcasting and private messaging functionality
 - [ ] Implement integration tests for the entire server flow
 
+## Database Modeling
+![model](img/db_model.jpeg)
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
