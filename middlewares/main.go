@@ -3,6 +3,7 @@ package middlewares
 import (
 	"context"
 	"net/http"
+	"strconv"
 
 	"github.com/dmarquinah/go_rooms/crypto"
 	"github.com/dmarquinah/go_rooms/types"
@@ -23,7 +24,7 @@ func JWTmiddleware(next http.HandlerFunc) http.Handler {
 			id := crypto.GetIdFromJWT(*token)
 
 			// Setting up the ID from validated user into the context so it can be used to further requests
-			ctx := context.WithValue(r.Context(), utils.IdKey, id)
+			ctx := context.WithValue(r.Context(), utils.IdKey, strconv.Itoa(*id))
 			r = r.WithContext(ctx)
 
 			next.ServeHTTP(w, r)

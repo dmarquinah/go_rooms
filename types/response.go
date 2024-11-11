@@ -14,7 +14,7 @@ type SuccessResponse struct {
 type ErrorResponse struct {
 	Status  string `json:"status" bson:"status"`
 	Message string `json:"message" bson:"message"`
-	Code    int    `json:"cpde" bson:"code"`
+	Code    int    `json:"code" bson:"code"`
 }
 
 func WriteSuccessResponse(w http.ResponseWriter, message string, data any) {

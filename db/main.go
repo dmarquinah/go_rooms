@@ -6,7 +6,9 @@ import (
 	"os"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	driver "database/sql/driver"
+
+	"github.com/go-sql-driver/mysql"
 )
 
 const DB_HOST_KEY = "DB_HOST"
@@ -15,19 +17,23 @@ const DB_PASSWORD_KEY = "DB_PASSWORD"
 const DB_USER_KEY = "DB_USER"
 const DB_NAME_KEY = "DB_NAME"
 
-func HandleDBConnection() *sql.DB {
-	// Open connection to Database
-	database, err := sql.Open("mysql", getDSN())
+const defaultCollation = "utf8mb4_general_ci"
 
+func HandleDBConnection() *sql.DB {
+	connector, err := getDBConnector()
 	if err != nil {
 		// Panic so it ends app execution
 		panic(err.Error())
 	}
+	// Open connection to Database
+	database := sql.OpenDB(connector)
 
-	database.SetConnMaxLifetime(time.Minute * 3)
+	database.SetConnMaxLifetime(time.Minute * 5)
 	database.SetMaxOpenConns(10)
 	database.SetMaxIdleConns(10)
 
+	// Not necessary to close the connection
+	// https://pkg.go.dev/database/sql#Open
 	//defer database.Close()
 
 	// Check connection status
@@ -39,11 +45,26 @@ func HandleDBConnection() *sql.DB {
 	return database
 }
 
-func getDSN() string {
+func getDBConnector() (driver.Connector, error) {
 	dbHost := os.Getenv(DB_HOST_KEY)
 	dbPort := os.Getenv(DB_PORT_KEY)
 	dbUser := os.Getenv(DB_USER_KEY)
 	dbPassword := os.Getenv(DB_PASSWORD_KEY)
 	dbName := os.Getenv(DB_NAME_KEY)
-	return dbUser + ":" + dbPassword + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName
+
+	dbAddr := dbHost + ":" + dbPort
+
+	cfg := mysql.Config{
+		User:                 dbUser,
+		Passwd:               dbPassword,
+		Net:                  "tcp",
+		Addr:                 dbAddr,
+		DBName:               dbName,
+		Loc:                  time.Local,
+		ParseTime:            true,
+		Collation:            defaultCollation,
+		AllowNativePasswords: true,
+	}
+
+	return mysql.NewConnector(&cfg)
 }

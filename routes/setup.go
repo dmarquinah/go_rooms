@@ -11,6 +11,10 @@ import (
 )
 
 func SetupGlobalMiddlewares(router *http.ServeMux) http.Handler {
+	return setupLoggingMiddleware(router)
+}
+
+func setupLoggingMiddleware(router *http.ServeMux) http.Handler {
 	var logger log.Logger
 	// Logfmt is a structured, key=val logging format that is easy to read and parse
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))

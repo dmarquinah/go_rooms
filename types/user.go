@@ -15,7 +15,7 @@ import (
 type User struct {
 	UserId     int       `json:"user_id" bson:"user_id"`
 	Email      string    `json:"email" bson:"email"`
-	Password   string    `json:"password" bson:"password"`
+	Password   string    `json:"password,omitempty" bson:"password"`
 	CreatedAt  time.Time `json:"created_at" bson:"created_at"`
 	UserHandle string    `json:"user_handle" bson:"user_handle"`
 }
@@ -38,36 +38,30 @@ func GetUser(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		userRecord, err := getUserFromId(id, database)
 		if err != nil {
 			WriteErrorResponse(w, err.Error(), http.StatusInternalServerError)
-
+			return
 		}
 
 		if userRecord == nil {
 			WriteErrorResponse(w, "Error retrieving user data.", http.StatusInternalServerError)
+			return
 		}
 
 		WriteSuccessResponse(w, GetSuccessMessage(r), userRecord)
-
+		return
 	}
 }
 
 func getUserFromId(id string, database *sql.DB) (*User, error) {
-	rows, err := database.Query(db.GET_LOGGED_USER_STATEMENT, id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	// Iterating rows
-	rows.Next()
 	var user User
-	err = rows.Scan(&user.UserId, &user.Email, &user.CreatedAt, &user.UserHandle)
-	if err != nil {
+	var userHandle sql.NullString
+
+	row := database.QueryRow(db.GET_LOGGED_USER_STATEMENT, id)
+	if err := row.Scan(&user.UserId, &user.Email, &user.CreatedAt, &userHandle); err != nil {
 		return nil, err
 	}
 
-	// Check errors on rows
-	if err := rows.Err(); err != nil {
-		return nil, err
+	if userHandle.Valid {
+		user.UserHandle = userHandle.String
 	}
 
 	return &user, nil
