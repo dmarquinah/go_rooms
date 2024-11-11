@@ -10,11 +10,11 @@ import (
 	"github.com/dmarquinah/go_rooms/middlewares"
 )
 
-func SetupGlobalMiddlewares(router *http.ServeMux) http.Handler {
+func SetupGlobalMiddlewares(router http.Handler) http.Handler {
 	return setupLoggingMiddleware(router)
 }
 
-func setupLoggingMiddleware(router *http.ServeMux) http.Handler {
+func setupLoggingMiddleware(router http.Handler) http.Handler {
 	var logger log.Logger
 	// Logfmt is a structured, key=val logging format that is easy to read and parse
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
