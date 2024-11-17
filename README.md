@@ -66,7 +66,7 @@ Go Rooms is a backend application written in Golang. It aims to create WebSocket
 - [ ] Implement integration tests for the entire server flow
 
 ## Database Modeling
-![model](img/db_model.jpeg)
+![model](img/db_model_0_1.png)
 
 ## License
 

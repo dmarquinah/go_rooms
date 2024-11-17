@@ -29,7 +29,9 @@ func GenerateJWT(id int) *string {
 	ttl := 24 * time.Hour
 
 	claims := token.Claims.(jwt.MapClaims)
+	// Add expiration time to JWT
 	claims["exp"] = time.Now().UTC().Add(ttl).Unix()
+	// Set ID to identify client
 	claims["id"] = id
 
 	tokenString, err := token.SignedString(secretKey)
