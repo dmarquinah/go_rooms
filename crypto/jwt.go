@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -23,7 +24,7 @@ func tokenValidator(t *jwt.Token) (interface{}, error) {
 	return secretKey, nil
 }
 
-func GenerateJWT(id int, targetRole string) *string {
+func GenerateJWT(id string, targetRole string) *string {
 	secretKey := getSecretKey()
 	token := jwt.New(jwt.SigningMethodHS256)
 	ttl := 24 * time.Hour
@@ -44,7 +45,7 @@ func GenerateJWT(id int, targetRole string) *string {
 	return &tokenString
 }
 
-func ValidateJWT(tokenString string, key string) bool {
+func ValidateJWT(tokenString string) bool {
 	token, err := jwt.Parse(tokenString, tokenValidator)
 
 	if err != nil {
@@ -61,38 +62,35 @@ func ValidateJWT(tokenString string, key string) bool {
 	if !ok {
 		return false
 	}
-
-	id := GetIdFromJWT(tokenString)
-
-	switch key {
-	case "id":
-		return int(claims["id"].(float64)) == *id
-	default:
-		return false
-	}
+	// For now we validate if those two values exists
+	return claims["id"] != nil && claims["role"] != nil
 }
 
-func GetIdFromJWT(tokenString string) *int {
+func GetFieldFromJWT(tokenString string, field string) (string, error) {
 	token, err := jwt.Parse(tokenString, tokenValidator)
 
 	if err != nil {
-		return nil
+		return "", err
 	}
 
 	if !token.Valid {
-		return nil
+		return "", err
 	}
 
 	// When token is valid
 	claims, ok := token.Claims.(jwt.MapClaims)
 
 	if !ok {
-		return nil
+		return "", errors.New("error parsing auth token")
 	}
 
-	id := int(claims["id"].(float64))
+	data := claims[field]
 
-	return &id
+	if data == nil {
+		return "", errors.New("invalid auth token")
+	}
+
+	return data.(string), nil
 }
 
 func GetJWTFromRequest(w http.ResponseWriter, r *http.Request) *string {

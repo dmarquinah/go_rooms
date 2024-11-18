@@ -46,7 +46,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		WriteErrorResponse(w, "Email/Password incorrect", http.StatusUnauthorized)
 	}
 
-	tokenString := crypto.GenerateJWT(userRecord.UserId, utils.USER_ROLE)
+	tokenString := crypto.GenerateJWT(strconv.Itoa(userRecord.UserId), utils.USER_ROLE)
 
 	WriteSuccessResponse(w, GetSuccessMessage(r), *tokenString)
 }
@@ -135,7 +135,7 @@ func LoginHost(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		return
 	}
 
-	tokenString := crypto.GenerateJWT(hostRecord.HostId, utils.HOST_ROLE)
+	tokenString := crypto.GenerateJWT(strconv.Itoa(hostRecord.HostId), utils.HOST_ROLE)
 
 	WriteSuccessResponse(w, GetSuccessMessage(r), *tokenString)
 }
