@@ -23,7 +23,7 @@ func tokenValidator(t *jwt.Token) (interface{}, error) {
 	return secretKey, nil
 }
 
-func GenerateJWT(id int) *string {
+func GenerateJWT(id int, targetRole string) *string {
 	secretKey := getSecretKey()
 	token := jwt.New(jwt.SigningMethodHS256)
 	ttl := 24 * time.Hour
@@ -33,6 +33,7 @@ func GenerateJWT(id int) *string {
 	claims["exp"] = time.Now().UTC().Add(ttl).Unix()
 	// Set ID to identify client
 	claims["id"] = id
+	claims["role"] = targetRole
 
 	tokenString, err := token.SignedString(secretKey)
 	if err != nil {

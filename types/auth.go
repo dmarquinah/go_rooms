@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/dmarquinah/go_rooms/crypto"
+	"github.com/dmarquinah/go_rooms/utils"
 )
 
 func LoginUser(w http.ResponseWriter, r *http.Request, database *sql.DB) {
@@ -45,7 +46,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		WriteErrorResponse(w, "Email/Password incorrect", http.StatusUnauthorized)
 	}
 
-	tokenString := crypto.GenerateJWT(userRecord.UserId)
+	tokenString := crypto.GenerateJWT(userRecord.UserId, utils.USER_ROLE)
 
 	WriteSuccessResponse(w, GetSuccessMessage(r), *tokenString)
 }
@@ -134,7 +135,7 @@ func LoginHost(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		return
 	}
 
-	tokenString := crypto.GenerateJWT(hostRecord.HostId)
+	tokenString := crypto.GenerateJWT(hostRecord.HostId, utils.HOST_ROLE)
 
 	WriteSuccessResponse(w, GetSuccessMessage(r), *tokenString)
 }
