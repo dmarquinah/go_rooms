@@ -9,7 +9,7 @@ import (
 )
 
 func createUserRoutes(mux *http.ServeMux, database *sql.DB) {
-	mux.Handle("GET /user", middlewares.JWTmiddleware(handleGetUser(database)))
+	mux.Handle("GET /user/self", middlewares.JWTmiddleware(handleGetUser(database)))
 }
 
 func handleGetUser(database *sql.DB) http.HandlerFunc {
