@@ -35,7 +35,7 @@ func BodyToUser(body []byte) (*User, error) {
 
 func GetUser(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	if id, ok := r.Context().Value(utils.IdKey).(string); ok {
-		userRecord, err := getUserFromId(id, database)
+		userRecord, err := findUserById(id, database)
 		if err != nil {
 			WriteErrorResponse(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -51,7 +51,7 @@ func GetUser(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	}
 }
 
-func getUserFromId(id string, database *sql.DB) (*User, error) {
+func findUserById(id string, database *sql.DB) (*User, error) {
 	var user User
 	var userHandle sql.NullString
 

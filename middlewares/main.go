@@ -21,15 +21,21 @@ func JWTmiddleware(next http.HandlerFunc) http.Handler {
 			}
 
 			id, err := crypto.GetFieldFromJWT(*token, "id")
-
 			if err != nil {
 				types.WriteErrorResponse(w, "Invalid Auth token", http.StatusUnauthorized)
 				return
 			}
 
-			// Setting up the ID from validated user into the context so it can be used to further requests
+			role, err := crypto.GetFieldFromJWT(*token, "role")
+			if err != nil {
+				types.WriteErrorResponse(w, "Invalid Auth token", http.StatusUnauthorized)
+				return
+			}
+
+			// Setting up the ID from validated user into the context so it can be used down the call chain
 			ctx := context.WithValue(r.Context(), utils.IdKey, id)
-			r = r.WithContext(ctx)
+			ctx_roles := context.WithValue(ctx, utils.RoleKey, role)
+			r = r.WithContext(ctx_roles)
 
 			next.ServeHTTP(w, r)
 		}

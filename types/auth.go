@@ -24,7 +24,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	}
 
 	if user == nil {
-		WriteErrorResponse(w, "Error wrapping the body to user.", http.StatusBadRequest)
+		WriteErrorResponse(w, "Internal Error on Body.", http.StatusBadRequest)
 		return
 	}
 
@@ -37,7 +37,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	}
 
 	if userRecord == nil {
-		WriteErrorResponse(w, "User email not found.", http.StatusBadRequest)
+		WriteErrorResponse(w, "User email not found.", http.StatusNotFound)
 		return
 	}
 
@@ -67,7 +67,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	}
 
 	if user == nil {
-		WriteErrorResponse(w, "Error wrapping the body to user.", http.StatusBadRequest)
+		WriteErrorResponse(w, "Internal Error on Body.", http.StatusBadRequest)
 		return
 	}
 
@@ -88,7 +88,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		WriteErrorResponse(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	WriteSuccessResponse(w, GetSuccessMessage(r), strconv.Itoa(inserted.UserId))
+	WriteSuccessResponse(w, GetSuccessMessage(r), inserted)
 
 }
 
@@ -107,7 +107,7 @@ func LoginHost(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	}
 
 	if host == nil {
-		WriteErrorResponse(w, "Error wrapping the body to host.", http.StatusBadRequest)
+		WriteErrorResponse(w, "Internal Error on Body.", http.StatusBadRequest)
 		return
 	}
 
@@ -156,7 +156,7 @@ func RegisterHost(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	}
 
 	if host == nil {
-		WriteErrorResponse(w, "Error wrapping the body to host.", http.StatusBadRequest)
+		WriteErrorResponse(w, "Internal Error on Body.", http.StatusBadRequest)
 		return
 	}
 
@@ -180,6 +180,5 @@ func RegisterHost(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		return
 	}
 
-	WriteSuccessResponse(w, GetSuccessMessage(r), strconv.Itoa(inserted.HostId))
-
+	WriteSuccessResponse(w, GetSuccessMessage(r), inserted)
 }

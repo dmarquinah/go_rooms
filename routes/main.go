@@ -10,6 +10,7 @@ func BuildRouter(database *sql.DB) *http.ServeMux {
 	createAuthRoutes(router, database)
 	createUserRoutes(router, database)
 	createHostRoutes(router, database)
+	createRoomRoutes(router, database)
 
 	return router
 }
