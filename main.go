@@ -11,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const SERVER_PORT string = ":5000"
+const DEFAULT_SERVER_PORT string = ":5000"
 
 func main() {
 	//Handle load of environment params
@@ -27,6 +27,11 @@ func main() {
 	router := routes.BuildRouter(database)
 
 	updatedRouter := routes.SetupGlobalMiddlewares(router)
+
+	SERVER_PORT := os.Getenv("PORT")
+	if SERVER_PORT == "" {
+		SERVER_PORT = DEFAULT_SERVER_PORT
+	}
 
 	fmt.Println("Server listening on port " + SERVER_PORT)
 	if err := http.ListenAndServe(SERVER_PORT, updatedRouter); err != nil {
