@@ -19,7 +19,7 @@ const DB_NAME_KEY = "DB_NAME"
 
 const defaultCollation = "utf8mb4_general_ci"
 
-func HandleDBConnection() *sql.DB {
+func HandleDBConnection() (*sql.DB, error) {
 	connector, err := getDBConnector()
 	if err != nil {
 		// Panic so it ends app execution
@@ -39,10 +39,10 @@ func HandleDBConnection() *sql.DB {
 	// Check connection status
 	err = database.Ping()
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
 	log.Println("Database connected successfully!")
-	return database
+	return database, nil
 }
 
 func getDBConnector() (driver.Connector, error) {

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/dmarquinah/go_rooms/database/cache"
 	"github.com/dmarquinah/go_rooms/database/db"
 	"github.com/dmarquinah/go_rooms/routes"
 	"github.com/joho/godotenv"
@@ -21,8 +22,19 @@ func main() {
 		log.Fatalf("Error loading the .env file")
 	}
 
+	// Initialize Redis
+	err = cache.InitRedis()
+	if err != nil {
+		log.Fatalf("Failed to connect to Cache: %v", err)
+		os.Exit(1)
+	}
+
 	// DB connection logic lays here
-	database := db.HandleDBConnection()
+	database, err := db.HandleDBConnection()
+	if err != nil {
+		log.Fatalf("Failed to connect to Database: %v", err)
+		os.Exit(1)
+	}
 
 	router := routes.BuildRouter(database)
 
