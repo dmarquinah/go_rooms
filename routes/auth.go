@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/dmarquinah/go_rooms/types"
+	"github.com/dmarquinah/go_rooms/services"
 )
 
 func createAuthRoutes(mux *http.ServeMux, database *sql.DB) {
@@ -16,24 +16,24 @@ func createAuthRoutes(mux *http.ServeMux, database *sql.DB) {
 
 func handlePostLogin(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		types.LoginUser(w, r, database)
+		services.LoginUser(w, r, database)
 	}
 }
 
 func handlePostRegister(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		types.RegisterUser(w, r, database)
+		services.RegisterUser(w, r, database)
 	}
 }
 
 func handlePostHostLogin(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		types.LoginHost(w, r, database)
+		services.LoginHost(w, r, database)
 	}
 }
 
 func handlePostHostRegister(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		types.RegisterHost(w, r, database)
+		services.RegisterHost(w, r, database)
 	}
 }

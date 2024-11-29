@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dmarquinah/go_rooms/middlewares"
-	"github.com/dmarquinah/go_rooms/types"
+	"github.com/dmarquinah/go_rooms/services"
 )
 
 func createHostRoutes(mux *http.ServeMux, database *sql.DB) {
@@ -14,6 +14,6 @@ func createHostRoutes(mux *http.ServeMux, database *sql.DB) {
 
 func handleGetHost(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		types.GetHost(w, r, database)
+		services.GetHost(w, r, database)
 	}
 }

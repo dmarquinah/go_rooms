@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dmarquinah/go_rooms/middlewares"
-	"github.com/dmarquinah/go_rooms/types"
+	"github.com/dmarquinah/go_rooms/services"
 )
 
 func createUserRoutes(mux *http.ServeMux, database *sql.DB) {
@@ -14,6 +14,6 @@ func createUserRoutes(mux *http.ServeMux, database *sql.DB) {
 
 func handleGetUser(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		types.GetUser(w, r, database)
+		services.GetUser(w, r, database)
 	}
 }

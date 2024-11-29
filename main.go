@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/dmarquinah/go_rooms/db"
+	"github.com/dmarquinah/go_rooms/database/db"
 	"github.com/dmarquinah/go_rooms/routes"
 	"github.com/joho/godotenv"
 )

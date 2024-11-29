@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dmarquinah/go_rooms/middlewares"
-	"github.com/dmarquinah/go_rooms/types"
+	"github.com/dmarquinah/go_rooms/services"
 )
 
 func createRoomRoutes(mux *http.ServeMux, database *sql.DB) {
@@ -15,12 +15,12 @@ func createRoomRoutes(mux *http.ServeMux, database *sql.DB) {
 
 func handleGetRoomById(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		types.GetRoomById(w, r, database)
+		services.GetRoomById(w, r, database)
 	}
 }
 
 func handlePostRoom(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		types.CreateRoom(w, r, database)
+		services.CreateRoom(w, r, database)
 	}
 }
