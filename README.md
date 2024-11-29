@@ -5,6 +5,8 @@ Go Rooms is a backend application written in Golang. It aims to create WebSocket
 ## Requirements
 
 - Golang 1.22.2 or later
+- MySQL 8.0 or later
+- Redis 7.0 or later
 
 ## Getting Started
 
@@ -26,6 +28,28 @@ Go Rooms is a backend application written in Golang. It aims to create WebSocket
 
 ### Core Functionality
 
+- [x] Set up basic RESTful API server
+- [x] Create and authenticate Users
+- [x] Create and authenticate Hosts
+- [x] Ability to create new rooms by Users
+- [x] Implement unique room identifiers and codes
+
+### Error Handling
+
+- [x] Log server-side errors for debugging
+- [x] Handle API errors gracefully
+- [x] Return meaningful error messages to users
+- [ ] Handle unexpected WebSocket closures
+
+### Security
+
+- [x] Validate incoming messages and data
+- [x] Prevent unauthorized access to User data
+- [ ] Add rate-limiting for message frequency
+- [ ] Implement basic input sanitization
+
+## Real Time Communication
+
 - [ ] Set up basic WebSocket server
 - [ ] Create and manage WebSocket rooms
 - [ ] Allow users to join and leave rooms
@@ -38,19 +62,6 @@ Go Rooms is a backend application written in Golang. It aims to create WebSocket
 - [ ] Handle user reconnections gracefully
 - [ ] Allow users to send private messages within a room
 - [ ] Implement username or ID-based user identification
-
-### Security
-
-- [ ] Validate incoming messages and data
-- [ ] Prevent unauthorized access to rooms
-- [ ] Add rate-limiting for message frequency
-- [ ] Implement basic input sanitization
-
-### Error Handling
-
-- [ ] Handle unexpected WebSocket closures
-- [ ] Return meaningful error messages to users
-- [ ] Log server-side errors for debugging
 
 ### Optimization
 
