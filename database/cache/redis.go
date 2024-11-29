@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"os"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -11,10 +12,24 @@ import (
 var rdb *redis.Client
 var ctx = context.Background()
 
+var DEFAULT_ADDR = "localhost:6379"
+var DEFAULT_PASSWORD = ""
+
 func InitRedis() error {
+	addr := os.Getenv("REDIS_HOST")
+	password := os.Getenv("REDIS_PASSWORD")
+
+	if addr == "" {
+		addr = DEFAULT_ADDR
+	}
+
+	if password == "" {
+		password = DEFAULT_PASSWORD
+	}
+
 	rdb = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
+		Addr:     addr,
+		Password: password,
 		DB:       0,
 	})
 
