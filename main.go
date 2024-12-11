@@ -23,9 +23,16 @@ func main() {
 	}
 
 	// Initialize Redis
-	err = cache.InitRedis()
+	redis, err := cache.CreateRedisInstance("cache")
 	if err != nil {
 		log.Fatalf("Failed to connect to Cache: %v", err)
+		os.Exit(1)
+	}
+
+	// Initialize PubSub
+	pubSub, err := cache.CreateRedisInstance("broker")
+	if err != nil {
+		log.Fatalf("Failed to connect to Broker: %v", err)
 		os.Exit(1)
 	}
 
@@ -36,7 +43,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	router := routes.BuildRouter(database)
+	router := routes.BuildRouter(database, redis, pubSub)
 
 	updatedRouter := routes.SetupGlobalMiddlewares(router)
 

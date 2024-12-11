@@ -12,12 +12,17 @@ import (
 var rdb *redis.Client
 var ctx = context.Background()
 
+var DEFAULT_ID = "Redis"
 var DEFAULT_ADDR = "localhost:6379"
 var DEFAULT_PASSWORD = ""
 
-func InitRedis() error {
+func CreateRedisInstance(id string) (*redis.Client, error) {
 	addr := os.Getenv("REDIS_HOST")
 	password := os.Getenv("REDIS_PASSWORD")
+
+	if id == "" {
+		id = DEFAULT_ID
+	}
 
 	if addr == "" {
 		addr = DEFAULT_ADDR
@@ -37,11 +42,11 @@ func InitRedis() error {
 	_, err := rdb.Ping(ctx).Result()
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	log.Println("Connected to Redis successfully")
-	return nil
+	log.Printf("Connected to %s successfully", id)
+	return rdb, nil
 }
 
 // Publish message to Redis channel
@@ -65,4 +70,28 @@ func SubscribeToChannel(channel string, handler func(message map[string]string))
 			}
 		}
 	}()
+}
+
+// Add a single value into the set defined by a "key" name
+func AddToSet(key string, value string) error {
+	if err := rdb.SAdd(ctx, key, value).Err(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Remove existing value from the set defined by a "key" name
+func RemoveFromSet(key string, value string) error {
+	if err := rdb.SRem(ctx, key, value).Err(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetSetMemberValues(key string) ([]string, error) {
+	result, err := rdb.SMembers(ctx, key).Result()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

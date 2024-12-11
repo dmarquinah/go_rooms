@@ -1,6 +1,9 @@
 package middlewares
 
 import (
+	"bufio"
+	"fmt"
+	"net"
 	"net/http"
 	"runtime/debug"
 	"time"
@@ -34,10 +37,19 @@ func (rw *responseWriter) WriteHeader(code int) {
 	rw.wroteHeader = true
 }
 
+// Implement the http.Hijacker interface
+func (rw *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if hijacker, ok := rw.ResponseWriter.(http.Hijacker); ok {
+		return hijacker.Hijack()
+	}
+	return nil, nil, fmt.Errorf("underlying ResponseWriter doesn't support hijacking")
+}
+
 // LoggingMiddleware logs the incoming HTTP request & its duration.
 func LoggingMiddleware(logger log.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
+
 			defer func() {
 				if err := recover(); err != nil {
 					w.WriteHeader(http.StatusInternalServerError)
