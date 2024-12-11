@@ -28,8 +28,6 @@ func NewUserSession(userId string, roomId string, userRole string, conn *websock
 }
 
 func (u *UserSession) CreateSessionLoop() {
-	u.mutex.Lock()
-	defer u.mutex.Unlock()
 
 	log.Println("in session loop!")
 
@@ -42,6 +40,11 @@ func (u *UserSession) CreateSessionLoop() {
 
 		if messageType == websocket.TextMessage {
 			log.Printf("message recieved from client: %s\n", string(msg))
+
+			// Protecting websocket WriteMessage
+			u.mutex.Lock()
+			defer u.mutex.Unlock()
+
 			err := u.conn.WriteMessage(websocket.TextMessage, []byte("thanks for the data as message!"))
 			if err != nil {
 				if err != websocket.ErrReadLimit {

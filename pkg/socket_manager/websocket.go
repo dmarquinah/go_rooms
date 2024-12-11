@@ -1,4 +1,4 @@
-package eventbroker
+package socketmanager
 
 import (
 	"encoding/json"

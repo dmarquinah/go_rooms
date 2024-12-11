@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/dmarquinah/go_rooms/models"
+	socketmanager "github.com/dmarquinah/go_rooms/pkg/socket_manager"
 	"github.com/dmarquinah/go_rooms/repositories"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -189,7 +190,7 @@ func (m *RoomSessionManager) getClusterChannelRoom(userSession *models.UserSessi
 // publishMessage sends a message to the message broker
 func (m *RoomSessionManager) PublishMessage(
 	userSession *models.UserSession,
-	msg *WebSocketMessage,
+	msg *socketmanager.WebSocketMessage,
 ) error {
 	// Encode message
 	encodedMsg, err := msg.Encode()
@@ -216,7 +217,7 @@ func (m *RoomSessionManager) SubscribeToSessionEvents(userSession *models.UserSe
 // handleChannelMessage processes incoming messages from message broker
 func (m *RoomSessionManager) handleChannelMessage(payload string) {
 	// Decode message
-	msg, err := DecodeWebSocketMessage([]byte(payload))
+	msg, err := socketmanager.DecodeWebSocketMessage([]byte(payload))
 	if err != nil {
 		log.Printf("Error decoding message: %v", err)
 		return
@@ -228,25 +229,25 @@ func (m *RoomSessionManager) handleChannelMessage(payload string) {
 	}
 
 	switch msg.Type {
-	case MessageTypeUserConnected:
+	case socketmanager.MessageTypeUserConnected:
 		m.handleUserConnected(msg)
-	case MessageTypeUserDisconnected:
+	case socketmanager.MessageTypeUserDisconnected:
 		m.handleUserDisconnected(msg)
-	case MessageTypeRoomBroadcast:
+	case socketmanager.MessageTypeRoomBroadcast:
 		m.handleRoomNextQueueTrack(msg)
 	}
 }
 
 // Helper methods for message handling
-func (m *RoomSessionManager) handleUserConnected(msg *WebSocketMessage) {
+func (m *RoomSessionManager) handleUserConnected(msg *socketmanager.WebSocketMessage) {
 	//m.handleRoomBroadcast(msg)
 }
 
-func (m *RoomSessionManager) handleUserDisconnected(msg *WebSocketMessage) {
+func (m *RoomSessionManager) handleUserDisconnected(msg *socketmanager.WebSocketMessage) {
 	//m.handleRoomBroadcast(msg)
 }
 
-func (m *RoomSessionManager) handleRoomNextQueueTrack(msg *WebSocketMessage) {
+func (m *RoomSessionManager) handleRoomNextQueueTrack(msg *socketmanager.WebSocketMessage) {
 	// Broadcast to local connections in the specified room
 	/* m.Connections.Range(func(key, value any) bool {
 		connectionKey := key.(string)
@@ -274,8 +275,8 @@ func (m *RoomSessionManager) StartHeartbeat() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		heartbeatMsg := &WebSocketMessage{
-			Type:      MessageTypeNodeHeartbeat,
+		heartbeatMsg := &socketmanager.WebSocketMessage{
+			Type:      socketmanager.MessageTypeNodeHeartbeat,
 			NodeId:    m.NodeId,
 			Timestamp: time.Now(),
 		}
