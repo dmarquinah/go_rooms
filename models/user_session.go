@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -15,9 +16,10 @@ type UserSession struct {
 	conn     *websocket.Conn
 	lastSeen time.Time
 	mutex    sync.Mutex
+	//active   chan bool
 }
 
-func NewUserSession(userId string, roomId string, userRole string, conn *websocket.Conn) *UserSession {
+func NewUserSession(userId string, userRole string, roomId string, conn *websocket.Conn) *UserSession {
 	return &UserSession{
 		userId:   userId,
 		roomId:   roomId,
@@ -27,9 +29,10 @@ func NewUserSession(userId string, roomId string, userRole string, conn *websock
 	}
 }
 
-func (u *UserSession) CreateSessionLoop() {
+func (u *UserSession) CreateSessionLoop(roomSession *RoomSession) {
 
-	log.Println("in session loop!")
+	// Send connection confirmation message to all session users
+	go u.broadcastMessageToRoom(roomSession)
 
 	for {
 		messageType, msg, err := u.conn.ReadMessage()
@@ -54,6 +57,28 @@ func (u *UserSession) CreateSessionLoop() {
 			}
 		}
 
+	}
+}
+
+func (u *UserSession) broadcastMessageToRoom(roomSession *RoomSession) {
+	currentSessions := roomSession.getSessions()
+
+	for userId, session := range currentSessions {
+
+		// Not necessary show message to self
+		if userId == u.userId {
+			continue
+		}
+
+		// Protecting websocket WriteMessage
+		session.mutex.Lock()
+		defer session.mutex.Unlock()
+
+		err := session.conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("The user %s has just joined the Room #%s", u.userId, u.roomId)))
+		if err != nil {
+			log.Println("Error sending connection message")
+			continue
+		}
 	}
 }
 

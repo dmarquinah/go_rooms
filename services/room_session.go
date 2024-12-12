@@ -43,23 +43,14 @@ func (r *RoomSessionService) GetOrCreateRoomSession(context context.Context, roo
 
 // Subscribe user to any events in a specific room
 func (r *RoomSessionService) JoinUserToRoomSession(roomSession *models.RoomSession, user *models.User, conn *websocket.Conn) error {
-	// Channel to handle errors that can ocurr during concurrency
+	// Channel to handle errors that concurrent calls might have
 	errChannel := make(chan error)
 
 	// Store user session in memory
 	userSession := r.manager.StoreUserSession(roomSession, user, conn)
 
 	// Creates a WebSocket Read Loop for Session
-	go userSession.CreateSessionLoop()
-
-	// Deferring user session removal in case this func throws an error
-	defer func() {
-		err := r.manager.RemoveUserFromRoomSession(roomSession, user) // When session ends abruptly we want to remove the connection from memory
-		if err != nil {
-			errChannel <- err
-		}
-		close(errChannel)
-	}()
+	go userSession.CreateSessionLoop(roomSession)
 
 	if err := <-errChannel; err != nil {
 		return err
@@ -73,30 +64,7 @@ func (r *RoomSessionService) JoinUserToRoomSession(roomSession *models.RoomSessi
 		close(errChannel)
 	}()
 
-	// TODO: Send join message to broker
-	/* go func() {
-		msg := &eventbroker.WebSocketMessage{
-			Type:      eventbroker.MessageTypeUserConnected,
-			RoomId:    roomSession.RoomId,
-			NodeId:    r.manager.NodeId,
-			UserId:    userSession.GetSessionUser(),
-			Payload:   "Greetings to all in room",
-			Timestamp: time.Now(),
-		}
-
-		log.Println("Publishing to broker...")
-		if err := r.manager.PublishMessage(userSession, msg); err != nil {
-			errChannel <- err
-			close(errChannel)
-		}
-
-		log.Println("Published!")
-
-	}()
-	*/
-	go r.manager.SubscribeToSessionEvents(userSession)
-
-	// TODO: Create a heartbeat
+	// TODO: Create a pingpong
 
 	return nil
 }

@@ -15,3 +15,7 @@ func NewRoomSession(roomId string) *RoomSession {
 		SessionMap: make(map[string]*UserSession),
 	}
 }
+
+func (rs *RoomSession) getSessions() map[string]*UserSession {
+	return rs.SessionMap
+}

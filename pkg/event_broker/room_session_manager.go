@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
@@ -172,9 +171,13 @@ func (m *RoomSessionManager) StoreUserSession(roomSession *models.RoomSession, u
 	var session *models.UserSession
 	var exists bool
 
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+
 	session, exists = roomSession.SessionMap[user.UserId]
 	if !exists {
 		session = models.NewUserSession(user.UserId, user.UserRole, roomSession.RoomId, conn)
+		roomSession.SessionMap[user.UserId] = session
 	}
 
 	// If new or existing instance, always update LastSeen
@@ -208,81 +211,9 @@ func (m *RoomSessionManager) SubscribeToSessionEvents(userSession *models.UserSe
 	pubsub := m.PubSubClient.Subscribe(context.Background(), channel)
 	defer pubsub.Close()
 
-	ch := pubsub.Channel()
+	// TODO: handle broker channel subscription
+	/* ch := pubsub.Channel()
 	for msg := range ch {
 		m.handleChannelMessage(msg.Payload)
-	}
-}
-
-// handleChannelMessage processes incoming messages from message broker
-func (m *RoomSessionManager) handleChannelMessage(payload string) {
-	// Decode message
-	msg, err := socketmanager.DecodeWebSocketMessage([]byte(payload))
-	if err != nil {
-		log.Printf("Error decoding message: %v", err)
-		return
-	}
-
-	// Ignore messages from same node
-	if msg.NodeId == m.NodeId {
-		return
-	}
-
-	switch msg.Type {
-	case socketmanager.MessageTypeUserConnected:
-		m.handleUserConnected(msg)
-	case socketmanager.MessageTypeUserDisconnected:
-		m.handleUserDisconnected(msg)
-	case socketmanager.MessageTypeRoomBroadcast:
-		m.handleRoomNextQueueTrack(msg)
-	}
-}
-
-// Helper methods for message handling
-func (m *RoomSessionManager) handleUserConnected(msg *socketmanager.WebSocketMessage) {
-	//m.handleRoomBroadcast(msg)
-}
-
-func (m *RoomSessionManager) handleUserDisconnected(msg *socketmanager.WebSocketMessage) {
-	//m.handleRoomBroadcast(msg)
-}
-
-func (m *RoomSessionManager) handleRoomNextQueueTrack(msg *socketmanager.WebSocketMessage) {
-	// Broadcast to local connections in the specified room
-	/* m.Connections.Range(func(key, value any) bool {
-		connectionKey := key.(string)
-		conn := value.(*websocket.Conn)
-
-		// Extract room and user from connection key
-		roomID, userID, err := m.parseConnectionKey(connectionKey)
-		if err != nil || roomID != msg.RoomId {
-			return true
-		}
-
-		// Send message to connection
-		err = conn.WriteMessage(websocket.TextMessage, msg.Payload)
-		if err != nil {
-			log.Printf("Error broadcasting to %s: %v", userID, err)
-		}
-
-		return true
-	}) */
-}
-
-// startHeartbeat sends periodic heartbeats to cluster
-func (m *RoomSessionManager) StartHeartbeat() {
-	ticker := time.NewTicker(30 * time.Second)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		heartbeatMsg := &socketmanager.WebSocketMessage{
-			Type:      socketmanager.MessageTypeNodeHeartbeat,
-			NodeId:    m.NodeId,
-			Timestamp: time.Now(),
-		}
-		err := m.PublishMessage(nil, heartbeatMsg)
-		if err != nil {
-			return
-		}
-	}
+	} */
 }

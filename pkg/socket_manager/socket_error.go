@@ -23,7 +23,7 @@ const (
 )
 
 // WriteWSError sends an error message through the WebSocket connection
-func WriteWSError(conn *websocket.Conn, message string, code int) error {
+func WriteWSError(conn *websocket.Conn, message string, code int) {
 	response := ErrorResponse{
 		Status:  "error",
 		Message: message,
@@ -37,21 +37,20 @@ func WriteWSError(conn *websocket.Conn, message string, code int) error {
 		basicError := []byte(`{"status":"error","message":"Internal server error","code":4500}`)
 		closeErr := conn.WriteMessage(websocket.TextMessage, basicError)
 		if closeErr != nil {
-			return closeErr
+			return
 		}
-		return err
+		return
 	}
 
 	// Write the error message as a text message
 	if err := conn.WriteMessage(websocket.TextMessage, payload); err != nil {
-		return err
+		return
 	}
 
 	// Optional: Close the connection with an appropriate code
 	// You might want to only close on certain error types
 	if code >= 4000 {
-		return conn.Close()
+		conn.Close()
 	}
 
-	return nil
 }
