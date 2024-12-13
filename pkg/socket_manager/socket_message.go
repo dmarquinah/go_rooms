@@ -12,7 +12,6 @@ type WebSocketMessage struct {
 	UserId    string      `json:"user_id"`
 	Payload   string      `json:"payload"`
 	Timestamp time.Time   `json:"timestamp"`
-	NodeId    string      `json:"node_id"`
 }
 
 // MessageType defines different types of distributed messages
@@ -24,7 +23,7 @@ const (
 	MessageTypeUserDisconnected MessageType = "user_disconnected"
 
 	// Room-specific messages
-	MessageTypeRoomBroadcast MessageType = "room_queue_next_track"
+	MessageTypeRoomNextTrack MessageType = "room_queue_next"
 
 	// Control messages
 	MessageTypeNodeHeartbeat MessageType = "node_heartbeat"

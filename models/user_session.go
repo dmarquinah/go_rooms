@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	socketmanager "github.com/dmarquinah/go_rooms/pkg/socket_manager"
 	"github.com/gorilla/websocket"
 )
 
@@ -32,35 +33,18 @@ func NewUserSession(userId string, userRole string, roomId string, conn *websock
 func (u *UserSession) CreateSessionLoop(roomSession *RoomSession) {
 
 	// Send connection confirmation message to all session users
-	go u.broadcastMessageToRoom(roomSession)
+	go u.broadcastNewConnectionMsg(roomSession)
 
-	for {
-		messageType, msg, err := u.conn.ReadMessage()
+	// Creating a loop to keep hearing for messages
+	u.createReadLoop()
 
-		if err != nil {
-			break
-		}
-
-		if messageType == websocket.TextMessage {
-			log.Printf("message recieved from client: %s\n", string(msg))
-
-			// Protecting websocket WriteMessage
-			u.mutex.Lock()
-			defer u.mutex.Unlock()
-
-			err := u.conn.WriteMessage(websocket.TextMessage, []byte("thanks for the data as message!"))
-			if err != nil {
-				if err != websocket.ErrReadLimit {
-					continue
-				}
-				log.Printf("encountered error: %v", err)
-			}
-		}
-
-	}
 }
 
-func (u *UserSession) broadcastMessageToRoom(roomSession *RoomSession) {
+func (u *UserSession) broadcastNewConnectionMsg(roomSession *RoomSession) {
+	u.broadcastMessageToRoom(roomSession, fmt.Sprintf("The user %s has just joined the Room #%s", u.userId, u.roomId))
+}
+
+func (u *UserSession) broadcastMessageToRoom(roomSession *RoomSession, message string) {
 	currentSessions := roomSession.getSessions()
 
 	for userId, session := range currentSessions {
@@ -74,12 +58,58 @@ func (u *UserSession) broadcastMessageToRoom(roomSession *RoomSession) {
 		session.mutex.Lock()
 		defer session.mutex.Unlock()
 
-		err := session.conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("The user %s has just joined the Room #%s", u.userId, u.roomId)))
+		err := session.conn.WriteMessage(websocket.TextMessage, []byte(message))
 		if err != nil {
 			log.Println("Error sending connection message")
 			continue
 		}
 	}
+}
+
+func (u *UserSession) createReadLoop() {
+
+	for {
+		messageType, msgBytes, err := u.conn.ReadMessage()
+
+		if err != nil {
+			break
+		}
+
+		message := string(msgBytes)
+
+		if messageType == websocket.TextMessage {
+			if err := u.HandleSocketTextMessage(message); err != nil {
+				if err != websocket.ErrReadLimit {
+					// If read limit error, keep loop alive
+					continue
+				}
+				break // Close loop any other case
+			}
+		}
+	}
+}
+
+func (u *UserSession) HandleSocketTextMessage(command string) error {
+	// Protecting websocket WriteMessage
+	u.mutex.Lock()
+	defer u.mutex.Unlock()
+
+	err := u.conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("thanks for the message: %s", command)))
+	if err != nil {
+		if err != websocket.ErrReadLimit {
+			return err
+		}
+		log.Printf("encountered error: %v", err)
+	}
+
+	switch command {
+	case string(socketmanager.MessageTypeRoomNextTrack):
+		return nil
+	default:
+		return nil
+	}
+
+	//return nil
 }
 
 func (u *UserSession) UpdateLastSeen() {
